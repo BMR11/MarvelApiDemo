@@ -1,52 +1,38 @@
+import { observer } from 'mobx-react-lite';
 import React from 'react';
 import {Linking, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {Avatar, Icon} from 'react-native-elements';
-import {organizationStore} from '../../../App';
 import {Organization} from '../../entities/entityTypes';
 
 interface IProp {
   organization: Organization;
 }
-export const OrganizationRawView = ({organization}: IProp) => {
+export const OrganizationRawView = observer(({organization}: IProp) => {
   const repoUrl = `https://github.com/${organization.login}`;
+  const _opacity = organization.isRead ? 0.3 : 1;
   return (
     <View style={styles.container}>
       <Avatar
-        containerStyle={{opacity: organization.isRead ? 0.5 : 1}}
+        containerStyle={{opacity: _opacity}}
         size={64}
         rounded
         source={organization.avatar_url ? {uri: organization.avatar_url} : {}}
       />
-      <View
-        style={{
-          height: '100%',
-          opacity: organization.isRead ? 0.3 : 1,
-          flex: 1,
-          //   borderColor: 'black',
-          //   borderWidth: 1,
-          marginLeft: 5,
-          marginRight: 25,
-        }}>
-        <Text style={{fontSize: 20, color: 'white'}}>{organization.login}</Text>
-        <Text style={{color: '#F5EEDC'}}>{organization.description}</Text>
+      <View style={[styles.subContainer, {opacity: _opacity}]}>
+        <Text style={styles.name}>{organization.login}</Text>
         <TouchableOpacity
           onPress={() => {
             Linking.openURL(repoUrl);
           }}>
-          <Text style={{color: 'blue'}}>{repoUrl}</Text>
+          <Text style={styles.repoUrl}>{repoUrl}</Text>
         </TouchableOpacity>
+        <Text style={styles.desc}>{organization.description}</Text>
       </View>
       {organization.isRead && (
-        <View style={{position: 'absolute', right: 0, top: 0, zIndex: 999}}>
+        <View style={styles.readIndicatorContainer}>
           <Icon
             color="#ffffff"
-            containerStyle={{}}
-            disabledStyle={{}}
-            iconProps={{}}
-            iconStyle={{}}
             name="check-circle"
-            onLongPress={() => console.log('onLongPress()')}
-            onPress={() => console.log('onPress()')}
             size={20}
             type="fontAwesome"
           />
@@ -54,7 +40,7 @@ export const OrganizationRawView = ({organization}: IProp) => {
       )}
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -68,4 +54,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: 'row',
   },
+  subContainer: {
+    height: '100%',
+    flex: 1,
+    marginLeft: 5,
+    marginRight: 25,
+  },
+  name: {fontSize: 20, color: 'white'},
+  repoUrl: {color: 'blue', textDecorationLine: 'underline'},
+  desc: {color: '#F5EEDC'},
+  readIndicatorContainer: {position: 'absolute', right: 0, top: 0, zIndex: 999},
 });
