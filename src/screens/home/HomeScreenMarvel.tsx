@@ -10,15 +10,25 @@ import {
   View,
 } from 'react-native';
 import {Button, Text} from 'react-native-elements';
-import {organizationStore} from '../../../App';
-import {OrganizationRawView} from './OrganizationRawView';
+import {getComics} from '../../api/marvelApi';
+import {Comic} from '../../entities/entityTypes';
+import {ComicView} from '../ComicView';
+import {ComicRowView} from './ComicRowView';
+// import {organizationStore} from '../../../App';
+// import {OrganizationRawView} from './OrganizationRawView';
+import LottieView from 'lottie-react-native';
+import {useNavigation} from '@react-navigation/native';
 
-export const HomeScreen = observer(() => {
+export const HomeScreenMarvel = observer(() => {
+  const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  // const [startId, setStartId] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState();
   const [hasMore, setHasMore] = useState(false);
 
+  const [listData, setlListData] = useState<Comic[]>([]);
+
+  const [selectedComic, setSelectedComic] = useState<Comic | null>(null);
   // const onRefresh = React.useCallback(async () => {
   //   await loadOrganizations();
   // }, []);
@@ -38,77 +48,97 @@ export const HomeScreen = observer(() => {
   // }, [organizationStore.organizations]);
 
   useEffect(() => {
-    loadOrganizations(0);
+    loadOrganizations('mnt');
     return () => {};
   }, []);
 
-  const loadOrganizations = async (_startId = 0) => {
+  const loadOrganizations = async (caller = '') => {
     // setIsLoading(true);
-    await organizationStore.getAll(_startId);
-    // setIsLoading(false);
+    // console.warn(listData.length)
+    // console.warn(caller)
+    const resp = await getComics(listData.length);
+    if (resp.data) {
+      setlListData([...listData, ...resp.data.data.results]);
+    }
+    setIsLoading(false);
   };
+
+  useEffect(() => {
+    navigation.setOptions({title: `Comics(${listData.length})`});
+  }, [listData]);
 
   const onEndReached = () => {
     setHasMore(true);
-    const _nextStartId =
-      organizationStore.organizations.length > 0
-        ? organizationStore.organizations[
-            organizationStore.organizations.length - 1
-          ].id
-        : 0;
-    loadOrganizations(_nextStartId);
+    loadOrganizations('end');
   };
+
+  // if (selectedComic) {
+  //   return (
+  //     <ComicView
+  //       comic={selectedComic}
+  //       onClose={() => {
+  //         setSelectedComic(null);
+  //       }}
+  //     />
+  //   );
+  // }
 
   return (
     <View style={styles.container}>
       {isLoading ? (
-        <>
-          <ActivityIndicator />
+        <View style={{justifyContent: 'flex-end'}}>
+          <LottieView
+            style={{width: 100, alignSelf: 'center'}}
+            source={require('../../resources/lottie/45560-ironman-loader.json')}
+            autoPlay
+            loop
+          />
           <Text style={styles.text}> {'Loading...'}</Text>
-        </>
+        </View>
       ) : (
         <>
-          {organizationStore.error ? (
+          {error ? (
             <>
               <Text style={styles.text}>
-                {'Oops... Something went wrong!\n' + organizationStore.error}
+                {'Oops... Something went wrong!\n' + error}
               </Text>
               <Button
                 style={styles.retryButton}
                 title={'Retry'}
-                onPress={() => loadOrganizations(0)}
+                onPress={() => loadOrganizations('ret')}
               />
             </>
           ) : (
             <>
-              <Text style={styles.text}>{`Organizations(${organizationStore.organizations.length})`}</Text>
               <FlatList
                 refreshControl={
                   <RefreshControl
                     refreshing={refreshing}
                     onRefresh={() => {
-                      loadOrganizations(0);
+                      loadOrganizations('ref');
                     }}
                   />
                 }
-                data={organizationStore.organizations}
+                data={listData}
                 renderItem={({item, index}) => (
                   <TouchableOpacity
                     key={'kk' + index}
                     onPress={() => {
-                      organizationStore.markRead(item.id);
+                      // organizationStore.markRead(item.id);
+                      setSelectedComic(item);
+                      navigation.navigate('ComicDetails', {comic: item});
                     }}>
-                    <OrganizationRawView organization={item} />
+                    <ComicRowView index={index} comic={item} />
                   </TouchableOpacity>
                 )}
                 keyExtractor={(item, i) => i + ''}
                 onEndReached={onEndReached}
-                onEndReachedThreshold={2}
+                onEndReachedThreshold={0.5}
                 ListFooterComponent={() => {
                   return hasMore ? (
                     <View
                       style={{
-                        height:50,
+                        height: 50,
                         position: 'relative',
                         paddingVertical: 20,
                         borderTopWidth: 1,

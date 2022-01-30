@@ -46,18 +46,18 @@ export class OrganizationStore {
     });
   };
 
-  getAll = async () => {
+  getAll = async (startId: number) => {
     this.error = '';
     try {
-      const response = await OrganizationsApi.getAll();
+      const response = await OrganizationsApi.getAll(startId);
       if (response.data) {
         runInAction(() => {
-          this.organizations = response.data;
+          this.organizations = [...this.organizations, ...response.data];
         });
       }
       await this.restoreIsReadIds();
     } catch (error) {
-      console.error('OrganizationsApi.getAll', error);
+      // console.error('OrganizationsApi.getAll', error);
       this.error = '' + error;
     }
   };
