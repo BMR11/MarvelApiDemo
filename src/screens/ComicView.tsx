@@ -1,9 +1,9 @@
 import {useNavigation, useRoute} from '@react-navigation/native';
 import moment from 'moment';
 import React from 'react';
-import {ScrollView, View} from 'react-native';
+import {ImageBackground, ScrollView, View} from 'react-native';
 import {Avatar, Button, Image, Text} from 'react-native-elements';
-import { Card } from "react-native-elements";
+import {Card} from 'react-native-elements';
 import {MyColors} from '../constants/constants';
 import {Comic} from '../entities/entityTypes';
 
@@ -19,6 +19,20 @@ export const ComicView = ({}: IProps) => {
     : '';
   return (
     <View style={{flex: 1, backgroundColor: MyColors.bgColor, padding: 8}}>
+      <ImageBackground
+        style={{
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: -1,
+          flex: 1,
+          position: 'absolute',
+          opacity:0.5
+        }}
+        source={{uri: imageUrl}}
+        resizeMode="contain"
+      />
       <ScrollView>
         <Text style={{alignSelf: 'center', margin: 5}}>{comic.title}</Text>
         <Image
@@ -32,7 +46,7 @@ export const ComicView = ({}: IProps) => {
             marginTop: 5,
             padding: 3,
             borderRadius: 4,
-            backgroundColor: '#333333aa',
+            backgroundColor: '#333333dd',
             flexDirection: 'row',
             justifyContent: 'space-between',
           }}>
@@ -41,7 +55,7 @@ export const ComicView = ({}: IProps) => {
             if (p.type == 'printPrice') type = 'print';
             else if (p.type == 'digitalPurchasePrice') type = 'digital';
             else return null;
-            return <Text key={'p' + i}>{`${type}: $${p.price}`}</Text>;
+            return <Text style={{color:MyColors.bgColor}} key={'p' + i}>{`${type}: $${p.price}`}</Text>;
           })}
         </View>
 
@@ -50,77 +64,61 @@ export const ComicView = ({}: IProps) => {
             marginTop: 5,
             padding: 3,
             borderRadius: 4,
-            backgroundColor: '#333333aa',
+            backgroundColor: '#333333dd',
             justifyContent: 'space-between',
           }}>
           {comic.dates?.map((d, i) => {
             if (moment(d.date).isValid()) {
-              
             } else return null;
 
             return (
-              <Text key={'d' + i}>{`${d.type}: ${moment(d.date).format(
+              <Text style={{color:MyColors.bgColor}} key={'d' + i}>{`${d.type}: ${moment(d.date).format(
                 'll',
               )}`}</Text>
             );
           })}
         </View>
 
-        <Text style={{alignSelf: 'center', margin: 5}}>Stories</Text>
-        <View
-          style={{
-            marginTop: 5,
-            padding: 3,
-            borderRadius: 4,
-            backgroundColor: '#333333aa',
-            justifyContent: 'space-between',
-          }}>
-          {comic.stories?.items.map((s, i) => {
-            return <Text key={'p' + i}>{s.name}</Text>;
-          })}
-        </View>
+        {comic.stories.available > 0 && (
+          <MyCard title="Stories">
+            {comic.stories?.items.map((s, i) => {
+              return <Text style={{color:MyColors.bgColor}}  key={'p' + i}>{s.name}</Text>;
+            })}
+          </MyCard>
+        )}
 
-        <Text style={{alignSelf: 'center', margin: 5}}>Characters</Text>
-        <Card
-          style={{
-            marginTop: 5,
-            padding: 3,
-            borderRadius: 4,
-            backgroundColor: '#333333aa',
-            justifyContent: 'space-between',
-          }}>
-          {comic.characters?.items.map((s, i) => {
-            return <Text key={'p' + i}>{s.name}</Text>;
-          })}
-        </Card>
+        {comic.characters.available > 0 && (
+          <MyCard title="Characters">
+            {comic.characters?.items.map((s, i) => {
+              return <Text style={{color:MyColors.bgColor}} key={'p' + i}>{s.name}</Text>;
+            })}
+          </MyCard>
+        )}
 
-        <Card.Title>CARD WITH DIVIDER</Card.Title>
-        <Card.Divider/>
-        <View style={{position:"relative",alignItems:"center"}}>
-          <Image
-              style={{width:"100%",height:100}}
-              resizeMode="contain"
-              source={{ uri: "https://avatars0.githubusercontent.com/u/32242596?s=460&u=1ea285743fc4b083f95d6ee0be2e7bb8dcfc676e&v=4" }}
-            />
-          <Text >Pranshu Chittora</Text>
-         </View>
-         
-
-        <Text style={{alignSelf: 'center', margin: 5}}>Creators</Text>
-        <View
-          style={{
-            marginTop: 5,
-            padding: 3,
-            borderRadius: 4,
-            backgroundColor: '#333333aa',
-            justifyContent: 'space-between',
-          }}>
-          {comic.creators?.items.map((s, i) => {
-            return <Text key={'p' + i}>{s.name}</Text>;
-          })}
-        </View>
-
+        {comic.creators.available > 0 && (
+          <MyCard title="Creators">
+            {comic.creators?.items.map((s, i) => {
+              return <Text style={{color:MyColors.bgColor}} key={'p' + i}>{s.name}</Text>;
+            })}
+          </MyCard>
+        )}
       </ScrollView>
     </View>
+  );
+};
+
+const MyCard = ({title, children}: {title: string; children: any}) => {
+  return (
+    <Card containerStyle={{backgroundColor: '#333333dd',borderWidth:0,borderRadius:5}} wrapperStyle={{}}>
+      <Card.Title style={{color:MyColors.bgColor}}>{title}</Card.Title>
+      <Card.Divider />
+      <View
+        style={{
+          position: 'relative',
+          alignItems: 'center',
+        }}>
+        {children}
+      </View>
+    </Card>
   );
 };

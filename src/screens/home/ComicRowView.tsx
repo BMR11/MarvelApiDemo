@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     height: '100%',
     flex: 1,
     marginLeft: 5,
-    marginRight: 25,
+    // marginRight: 5,
   },
   name: {fontSize: 12, color: 'white'},
   repoUrl: {color: 'blue', textDecorationLine: 'underline'},
