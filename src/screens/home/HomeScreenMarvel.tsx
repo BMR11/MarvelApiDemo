@@ -18,6 +18,7 @@ import {ComicRowView} from './ComicRowView';
 // import {OrganizationRawView} from './OrganizationRawView';
 import LottieView from 'lottie-react-native';
 import {useNavigation} from '@react-navigation/native';
+import {MyColors} from '../../constants/constants';
 
 export const HomeScreenMarvel = observer(() => {
   const navigation = useNavigation();
@@ -140,13 +141,15 @@ export const HomeScreenMarvel = observer(() => {
                       style={{
                         height: 50,
                         position: 'relative',
-                        paddingVertical: 20,
-                        borderTopWidth: 1,
-                        marginTop: 10,
                         marginBottom: 10,
                         borderColor: 'pink',
                       }}>
-                      <ActivityIndicator animating size="large" />
+                       <LottieView
+            style={{width: 50, alignSelf: 'center'}}
+            source={require('../../resources/lottie/45560-ironman-loader.json')}
+            autoPlay
+            loop
+          />
                     </View>
                   ) : null;
                 }}
@@ -160,7 +163,11 @@ export const HomeScreenMarvel = observer(() => {
 });
 
 const styles = StyleSheet.create({
-  container: {backgroundColor: '#F5EEDC', flex: 1, justifyContent: 'center'},
+  container: {
+    backgroundColor: MyColors.bgColor,
+    flex: 1,
+    justifyContent: 'center',
+  },
   text: {fontSize: 25, textAlign: 'center', margin: 5},
   retryButton: {width: 100, alignSelf: 'center'},
 });

@@ -1,5 +1,5 @@
-import dayjs from 'dayjs';
 import {observer} from 'mobx-react-lite';
+import moment from 'moment';
 import React from 'react';
 import {Linking, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {Avatar, Icon} from 'react-native-elements';
@@ -58,11 +58,15 @@ export const ComicRowView = observer(({index, comic}: IProp) => {
           }}>
           {comic.dates?.map((d, i) => {
             let type = 'OnSale';
-            if (d.type == 'onsaleDate') type = 'OnSale';
-            else if (d.type == 'focDate') type = 'FOC';
-            else return null;
+            if(moment(d.date).isValid()){
+              if (d.type == 'onsaleDate') type = 'OnSale';
+              else if (d.type == 'focDate') type = 'FOC';
+              else return null;
+            }
+            else return null
+           
             return (
-              <Text key={'d' + i} style={styles.desc}>{`${type}: ${dayjs(
+              <Text key={'d' + i} style={styles.desc}>{`${type}: ${moment(
                 d.date,
               ).format('ll')}`}</Text>
             );
@@ -79,9 +83,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 5,
     margin: 5,
-    backgroundColor: '#F05454',
+    backgroundColor: '#D05454',
     borderRadius: 8,
-
     flexDirection: 'row',
   },
   subContainer: {
