@@ -1,22 +1,31 @@
 import Realm from 'realm';
 
-export const ComicSchemaName = 'Comic';
+export const ComicSchemaName = 'Comic14';
 const ComicSchema = {
   name: ComicSchemaName,
   properties: {
     _id: 'int',
-    name: 'string',
-    status: 'string?',
+    title: 'string?',
+    issueNumber: 'int?',
+    description: 'string?',
+    modified: 'string',
+    pageCount: 'int?',
+    onsaleDate: 'string?',
+    focDate: 'string?',
+    printPrice: 'float?',
+    digitalPurchasePrice: 'float?',
+    thumbnail: 'string?',
+    creators: {type: 'list', objectType: 'string'},
+    characters: {type: 'list', objectType: 'string'},
+    stories: {type: 'list', objectType: 'string'},
   },
   primaryKey: '_id',
 };
 
-
-
 // open a local realm with the 'Cat' schema
 export const getRealm = async () => {
   return await Realm.open({
-    path: 'myr12112',
+    path: 'myr121121122',
     schema: [ComicSchema],
   });
 };

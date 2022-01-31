@@ -12,6 +12,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React, {useEffect} from 'react';
 import {SafeAreaView, StatusBar, useColorScheme} from 'react-native';
+import Toast from 'react-native-toast-message';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {MyColors} from './src/constants/constants';
 import {getRealm} from './src/database/realm';
@@ -63,6 +64,8 @@ const App = () => {
   };
 
   return (
+    <>
+   
     <NavigationContainer>
       <SafeAreaView style={backgroundStyle}>
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
@@ -91,6 +94,8 @@ const App = () => {
         </Stack.Navigator>
       </SafeAreaView>
     </NavigationContainer>
+    <Toast />
+    </>
   );
 };
 

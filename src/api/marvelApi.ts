@@ -21,7 +21,7 @@ export const getComics = (_offset = 0) => {
     params: {
       ...apiKey,
       limit: 25,
-      offset: 0,
+      offset: _offset,
       format: 'comic',
       formatType: 'comic',
       orderBy: '-modified',

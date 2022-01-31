@@ -1,12 +1,11 @@
 import {useNavigation, useRoute} from '@react-navigation/native';
 import moment from 'moment';
 import React from 'react';
-import {ImageBackground, ScrollView, View} from 'react-native';
+import {ImageBackground, ScrollView, StyleSheet, View} from 'react-native';
 import {Avatar, Button, Image, Text} from 'react-native-elements';
 import {Card} from 'react-native-elements';
-import {MyColors} from '../constants/constants';
+import {FontFamily, MyColors} from '../constants/constants';
 import {Comic, ComicViewModel} from '../entities/entityTypes';
-
 
 export const ComicView = () => {
   const route = useRoute();
@@ -29,63 +28,100 @@ export const ComicView = () => {
         resizeMode="contain"
       />
       <ScrollView>
-        <Text style={{alignSelf: 'center', margin: 5}}>{comic.title}</Text>
-        <Image
-          source={{uri: imageUrl}}
-          style={{height: 200}}
-          resizeMode={'contain'}
-        />
-
+        <Text style={[styles.text, {alignSelf: 'center', margin: 5,color:'black'}]}>
+          {comic.title}
+        </Text>
         <View
           style={{
-            marginTop: 5,
-            padding: 3,
-            borderRadius: 4,
-            backgroundColor: '#333333dd',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
+            zIndex: 10,
+            borderColor: '#333333',
+            width: 150,
+            alignSelf: 'center',
+            borderRadius: 5,
+            borderWidth: 3,
           }}>
-          {typeof comic.printPrice === 'number' && (
-            <Text style={{color: MyColors.bgColor}}>{`Print: $${comic.printPrice}`}</Text>
-          )}
-          {typeof comic.digitalPurchasePrice === 'number' && (
-            <Text
-            style={{color: MyColors.bgColor}}>{`Digital: $${comic.digitalPurchasePrice}`}</Text>
-          )}
+          <Image
+            source={{uri: imageUrl}}
+            style={{height: 200}}
+            resizeMode={'stretch'}
+          />
         </View>
 
         <View
           style={{
-            marginTop: 5,
-            padding: 3,
-            borderRadius: 4,
-            backgroundColor: '#333333dd',
-            justifyContent: 'space-between',
-            flexDirection:'row'
+            backgroundColor: '#33333388',
+            marginTop: -100,
+            borderColor: '#333333',
+            borderRadius: 5,
+            borderWidth: 3,
+            padding: 5,
           }}>
-          {!!comic.onsaleDate && (
-            <Text style={{color: MyColors.bgColor}}>{`OnSale: ${moment(
-              comic.onsaleDate,
-            ).format('ll')}`}</Text>
-          )}
-          {!!comic.focDate && (
-            <Text style={{color: MyColors.bgColor}}>{`FOC: ${moment(comic.focDate).format(
-              'll',
-            )}`}</Text>
+          <View style={{height: 100}} />
+
+          <View
+            style={{
+              marginTop: 5,
+              padding: 5,
+              borderRadius: 50,
+              borderWidth:2,
+              backgroundColor: '#33333333',
+              borderColor: '#333333dd',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              paddingLeft:15,paddingRight:15
+            }}>
+            {(
+              <Text style={styles.text}>{`Print\n${typeof comic.printPrice === 'number'?'$'+comic.printPrice.toFixed(
+                2,
+              ) : '-'}`}</Text>
+            )}
+            { (
+              <Text
+                style={
+                  styles.text
+                }>{`Number of pages\n${typeof comic.pageCount === 'number' ? comic.pageCount : '-'}`}</Text>
+            )}
+            {  (
+              <Text
+                style={
+                  styles.text
+                }>{`Digital\n${typeof comic.digitalPurchasePrice === 'number'? '$'+comic.digitalPurchasePrice.toFixed(2):'-'}`}</Text>
+            )}
+          </View>
+
+          <View
+            style={{
+              marginTop: 5,
+              padding: 3,
+              borderRadius: 4,
+              backgroundColor: '#333333dd',
+              justifyContent: 'space-between',
+              flexDirection: 'row',
+            }}>
+            {!!comic.onsaleDate && moment(comic.onsaleDate).isValid() && (
+              <Text style={styles.text}>{`OnSale: ${moment(
+                comic.onsaleDate,
+              ).format('ll')}`}</Text>
+            )}
+            {!!comic.focDate && moment(comic.focDate).isValid() && (
+              <Text style={styles.text}>{`FOC: ${moment(comic.focDate).format(
+                'll',
+              )}`}</Text>
+            )}
+          </View>
+
+          {!!comic.description && (
+            <MyCard title="Description">
+              <Text style={styles.text}>{comic.description}</Text>
+            </MyCard>
           )}
         </View>
-
-        {!!comic.description && (
-          <MyCard title="Description">
-            <Text style={{color: MyColors.bgColor}}>{comic.description}</Text>
-          </MyCard>
-        )}
 
         {comic.stories.length > 0 && (
           <MyCard title="Stories">
             {comic.stories?.map((s, i) => {
               return (
-                <Text style={{color: MyColors.bgColor}} key={'p' + i}>
+                <Text style={styles.text} key={'p' + i}>
                   {s}
                 </Text>
               );
@@ -97,7 +133,7 @@ export const ComicView = () => {
           <MyCard title="Characters">
             {comic.characters?.map((s, i) => {
               return (
-                <Text style={{color: MyColors.bgColor}} key={'p' + i}>
+                <Text style={styles.text} key={'p' + i}>
                   {s}
                 </Text>
               );
@@ -109,7 +145,7 @@ export const ComicView = () => {
           <MyCard title="Creators">
             {comic.creators?.map((s, i) => {
               return (
-                <Text style={{color: MyColors.bgColor}} key={'p' + i}>
+                <Text style={styles.text} key={'p' + i}>
                   {s}
                 </Text>
               );
@@ -130,7 +166,7 @@ const MyCard = ({title, children}: {title: string; children: any}) => {
         borderRadius: 5,
       }}
       wrapperStyle={{}}>
-      <Card.Title style={{color: MyColors.bgColor}}>{title}</Card.Title>
+      <Text style={[styles.headerText, {alignSelf: 'center'}]}>{title}</Text>
       <Card.Divider />
       <View
         style={{
@@ -142,3 +178,31 @@ const MyCard = ({title, children}: {title: string; children: any}) => {
     </Card>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 5,
+    margin: 5,
+    backgroundColor: '#D05454',
+    borderRadius: 8,
+    flexDirection: 'row',
+  },
+  subContainer: {
+    height: '100%',
+    flex: 1,
+    marginLeft: 5,
+    // marginRight: 5,
+  },
+  headerText: {
+    color: MyColors.bgColor,
+    fontFamily: FontFamily.bold,
+    fontSize: 16,
+  },
+  text: {color: MyColors.bgColor, fontFamily: FontFamily.regular, fontSize: 14,textAlign:'center'},
+  name: {fontSize: 14, color: 'white', fontFamily: FontFamily.bold},
+  repoUrl: {color: 'blue', textDecorationLine: 'underline'},
+  desc: {color: '#F5EEDC', fontFamily: FontFamily.bold},
+  readIndicatorContainer: {position: 'absolute', right: 0, top: 0, zIndex: 999},
+});

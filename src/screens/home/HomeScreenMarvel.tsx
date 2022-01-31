@@ -20,10 +20,13 @@ import LottieView from 'lottie-react-native';
 import {useNavigation} from '@react-navigation/native';
 import {MyColors} from '../../constants/constants';
 import {ComicSchemaName, getRealm} from '../../database/realm';
+import {useNetInfo} from '@react-native-community/netinfo';
+import Toast from 'react-native-toast-message';
 
 export const ITEM_HEIGHT = 88;
 
 export const HomeScreenMarvel = observer(() => {
+  const netInfo = useNetInfo();
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,6 +36,8 @@ export const HomeScreenMarvel = observer(() => {
   const [listData, setlListData] = useState<ComicViewModel[]>([]);
 
   const [selectedComic, setSelectedComic] = useState<Comic | null>(null);
+
+  const isOffline = !(netInfo.isConnected && netInfo.isInternetReachable);
   // const onRefresh = React.useCallback(async () => {
   //   await loadOrganizations();
   // }, []);
@@ -52,51 +57,70 @@ export const HomeScreenMarvel = observer(() => {
   // }, [organizationStore.organizations]);
 
   useEffect(() => {
-    loadOrganizations('mnt');
+    if (isOffline) loadFromDb();
+    else loadOrganizations('mnt');
+
     return () => {};
   }, []);
 
-  const writeTodb = async (newComics: ComicViewModel[]) => {
+  const loadFromDb = async () => {
     const realm = await getRealm();
-    console.warn('start', realm.objects(ComicSchemaName).length);
-    let updatedComics: any[] = [];
-    realm.write(() => {
-      newComics.forEach(c => {
-        updatedComics.push(
-          realm.create(
-            ComicSchemaName,
-            {
-              _id: c.id,
-              name: c.title,
-              status: c.description,
-            },
-            'modified',
-          ),
-        );
-      });
-      // updatedComics.push(
-      //   realm.create(
-      //     ComicSchemaName,
-      //     {
-      //       _id: parseInt(newComics[0].id),
-      //           name: 'go grocery shopping',
-      //           status: 'Open',
-      //     },
-      //     'modified',
-      //   ),
-      // );
-      // realm.create('Task', {
-      //   _id: 2,
-      //   name: 'go exercise',
-      //   status: 'Open',
-      // });
-      // console.log(`created two tasks: ${task1.name} & ${task2.name}`);
-    });
-
-    console.warn('end', updatedComics.length);
+    const dbdata = await realm.objects(ComicSchemaName);
+    setlListData(dbdata);
+    setIsLoading(false);
   };
 
-  const loadOrganizations = async caller => {
+  const writeTodb = async (newComics: ComicViewModel[]) => {
+    const realm = await getRealm();
+    let updatedComics: any[] = [];
+    try {
+      realm.write(() => {
+        newComics.forEach(c => {
+          updatedComics.push(
+            realm.create(
+              ComicSchemaName,
+              {
+                _id: c.id,
+                title: c.title,
+                issueNumber: c.issueNumber,
+                description: c.description,
+                modified: c.modified,
+                pageCount: c.pageCount,
+                onsaleDate: c.onsaleDate,
+                focDate: c.focDate,
+                printPrice: c.printPrice,
+                digitalPurchasePrice: c.digitalPurchasePrice,
+                thumbnail: c.thumbnail,
+                creators: c.creators,
+                characters: c.characters,
+                stories: c.stories,
+              },
+              'modified',
+            ),
+          );
+        });
+      });
+    } catch (error) {
+      console.error(error);
+    }
+
+    // console.warn('end', updatedComics);
+    console.warn('ComicSchemaName', realm.objects(ComicSchemaName).length);
+
+  };
+
+  const loadOrganizations = async (caller) => {
+    if (isOffline) {
+      Toast.show({
+        type: 'error',
+        text1: 'Network not reachanle',
+        text2: 'Please check your internet connection',
+      });
+      setIsLoading(false);
+      setHasMore(false);
+      return;
+    }
+
     // setIsLoading(true);
     // console.warn(listData.length)
     // console.warn('loadOrganizations1',caller)
@@ -138,9 +162,12 @@ export const HomeScreenMarvel = observer(() => {
         };
       });
 
-      // writeTodb(comicViewModels);
-
+      writeTodb(comicViewModels);
+      if(caller == 'end')
       setlListData([...listData, ...comicViewModels]);
+      else
+      setlListData(comicViewModels)
+
     }
     setIsLoading(false);
   };
@@ -192,6 +219,7 @@ export const HomeScreenMarvel = observer(() => {
             </>
           ) : (
             <>
+            <Text style={styles.text}>{isOffline ? 'OFFLINE' : 'ONLINE'}</Text>
               <FlatList
                 refreshControl={
                   <RefreshControl
@@ -203,7 +231,8 @@ export const HomeScreenMarvel = observer(() => {
                 }
                 data={listData}
                 renderItem={({item, index}) => (
-                  <TouchableOpacity style={{height:ITEM_HEIGHT}}
+                  <TouchableOpacity
+                    // style={{height: ITEM_HEIGHT}}
                     key={'kk' + index}
                     onPress={() => {
                       // organizationStore.markRead(item.id);
@@ -227,6 +256,7 @@ export const HomeScreenMarvel = observer(() => {
                       style={{
                         height: 50,
                         position: 'relative',
+                        marginTop:10,
                         marginBottom: 10,
                         borderColor: 'pink',
                       }}>

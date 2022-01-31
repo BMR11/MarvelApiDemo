@@ -3,6 +3,7 @@ import moment from 'moment';
 import React from 'react';
 import {Linking, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {Avatar, Icon} from 'react-native-elements';
+import { FontFamily } from '../../constants/constants';
 import {
   Character,
   Comic,
@@ -39,13 +40,13 @@ export const ComicRowView = observer(({index, comic}: IProp) => {
             justifyContent: 'space-between',
           }}>
           {typeof comic.printPrice === 'number' && (
-            <Text style={styles.desc}>{`Print: $${comic.printPrice}`}</Text>
+            <Text style={styles.desc}>{`Print: $${comic.printPrice.toFixed(2)}`}</Text>
           )}
           {typeof comic.digitalPurchasePrice === 'number' && (
             <Text
               style={
                 styles.desc
-              }>{`Digital: $${comic.digitalPurchasePrice}`}</Text>
+              }>{`Digital: $${comic.digitalPurchasePrice.toFixed(2)}`}</Text>
           )}
         </View>
         <View
@@ -57,12 +58,12 @@ export const ComicRowView = observer(({index, comic}: IProp) => {
             flexDirection: 'row',
             justifyContent: 'space-between',
           }}>
-          {!!comic.onsaleDate && (
+          {!!comic.onsaleDate && moment(comic.onsaleDate).isValid() && (
             <Text style={styles.desc}>{`OnSale: ${moment(
               comic.onsaleDate,
             ).format('ll')}`}</Text>
           )}
-          {!!comic.focDate && (
+          {!!comic.focDate &&  moment(comic.focDate).isValid() && (
             <Text style={styles.desc}>{`FOC: ${moment(comic.focDate).format(
               'll',
             )}`}</Text>
@@ -79,7 +80,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 5,
     margin: 5,
-    backgroundColor: '#D05454',
+    backgroundColor: '#54BAB9',
     borderRadius: 8,
     flexDirection: 'row',
   },
@@ -89,8 +90,8 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     // marginRight: 5,
   },
-  name: {fontSize: 12, color: 'white'},
+  name: {fontSize: 14, color: 'white',fontFamily:FontFamily.bold},
   repoUrl: {color: 'blue', textDecorationLine: 'underline'},
-  desc: {color: '#F5EEDC'},
+  desc: {color: '#F5EEDC' ,fontFamily:FontFamily.bold},
   readIndicatorContainer: {position: 'absolute', right: 0, top: 0, zIndex: 999},
 });
