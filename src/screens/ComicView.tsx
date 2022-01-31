@@ -5,18 +5,13 @@ import {ImageBackground, ScrollView, View} from 'react-native';
 import {Avatar, Button, Image, Text} from 'react-native-elements';
 import {Card} from 'react-native-elements';
 import {MyColors} from '../constants/constants';
-import {Comic} from '../entities/entityTypes';
+import {Comic, ComicViewModel} from '../entities/entityTypes';
 
-interface IProps {
-  comic: Comic;
-  onClose: () => void;
-}
-export const ComicView = ({}: IProps) => {
+
+export const ComicView = () => {
   const route = useRoute();
-  const comic: Comic = route?.params?.comic!;
-  const imageUrl = comic?.thumbnail
-    ? `${comic.thumbnail.path}.${comic.thumbnail.extension}`
-    : '';
+  const comic: ComicViewModel = route?.params?.comic!;
+  const imageUrl = comic.thumbnail;
   return (
     <View style={{flex: 1, backgroundColor: MyColors.bgColor, padding: 8}}>
       <ImageBackground
@@ -28,7 +23,7 @@ export const ComicView = ({}: IProps) => {
           zIndex: -1,
           flex: 1,
           position: 'absolute',
-          opacity:0.5
+          opacity: 0.5,
         }}
         source={{uri: imageUrl}}
         resizeMode="contain"
@@ -50,13 +45,13 @@ export const ComicView = ({}: IProps) => {
             flexDirection: 'row',
             justifyContent: 'space-between',
           }}>
-          {comic.prices?.map((p, i) => {
-            let type = 'print';
-            if (p.type == 'printPrice') type = 'print';
-            else if (p.type == 'digitalPurchasePrice') type = 'digital';
-            else return null;
-            return <Text style={{color:MyColors.bgColor}} key={'p' + i}>{`${type}: $${p.price}`}</Text>;
-          })}
+          {typeof comic.printPrice === 'number' && (
+            <Text style={{color: MyColors.bgColor}}>{`Print: $${comic.printPrice}`}</Text>
+          )}
+          {typeof comic.digitalPurchasePrice === 'number' && (
+            <Text
+            style={{color: MyColors.bgColor}}>{`Digital: $${comic.digitalPurchasePrice}`}</Text>
+          )}
         </View>
 
         <View
@@ -66,39 +61,58 @@ export const ComicView = ({}: IProps) => {
             borderRadius: 4,
             backgroundColor: '#333333dd',
             justifyContent: 'space-between',
+            flexDirection:'row'
           }}>
-          {comic.dates?.map((d, i) => {
-            if (moment(d.date).isValid()) {
-            } else return null;
-
-            return (
-              <Text style={{color:MyColors.bgColor}} key={'d' + i}>{`${d.type}: ${moment(d.date).format(
-                'll',
-              )}`}</Text>
-            );
-          })}
+          {!!comic.onsaleDate && (
+            <Text style={{color: MyColors.bgColor}}>{`OnSale: ${moment(
+              comic.onsaleDate,
+            ).format('ll')}`}</Text>
+          )}
+          {!!comic.focDate && (
+            <Text style={{color: MyColors.bgColor}}>{`FOC: ${moment(comic.focDate).format(
+              'll',
+            )}`}</Text>
+          )}
         </View>
 
-        {comic.stories.available > 0 && (
+        {!!comic.description && (
+          <MyCard title="Description">
+            <Text style={{color: MyColors.bgColor}}>{comic.description}</Text>
+          </MyCard>
+        )}
+
+        {comic.stories.length > 0 && (
           <MyCard title="Stories">
-            {comic.stories?.items.map((s, i) => {
-              return <Text style={{color:MyColors.bgColor}}  key={'p' + i}>{s.name}</Text>;
+            {comic.stories?.map((s, i) => {
+              return (
+                <Text style={{color: MyColors.bgColor}} key={'p' + i}>
+                  {s}
+                </Text>
+              );
             })}
           </MyCard>
         )}
 
-        {comic.characters.available > 0 && (
+        {comic.characters.length > 0 && (
           <MyCard title="Characters">
-            {comic.characters?.items.map((s, i) => {
-              return <Text style={{color:MyColors.bgColor}} key={'p' + i}>{s.name}</Text>;
+            {comic.characters?.map((s, i) => {
+              return (
+                <Text style={{color: MyColors.bgColor}} key={'p' + i}>
+                  {s}
+                </Text>
+              );
             })}
           </MyCard>
         )}
 
-        {comic.creators.available > 0 && (
+        {comic.creators.length > 0 && (
           <MyCard title="Creators">
-            {comic.creators?.items.map((s, i) => {
-              return <Text style={{color:MyColors.bgColor}} key={'p' + i}>{s.name}</Text>;
+            {comic.creators?.map((s, i) => {
+              return (
+                <Text style={{color: MyColors.bgColor}} key={'p' + i}>
+                  {s}
+                </Text>
+              );
             })}
           </MyCard>
         )}
@@ -109,8 +123,14 @@ export const ComicView = ({}: IProps) => {
 
 const MyCard = ({title, children}: {title: string; children: any}) => {
   return (
-    <Card containerStyle={{backgroundColor: '#333333dd',borderWidth:0,borderRadius:5}} wrapperStyle={{}}>
-      <Card.Title style={{color:MyColors.bgColor}}>{title}</Card.Title>
+    <Card
+      containerStyle={{
+        backgroundColor: '#333333dd',
+        borderWidth: 0,
+        borderRadius: 5,
+      }}
+      wrapperStyle={{}}>
+      <Card.Title style={{color: MyColors.bgColor}}>{title}</Card.Title>
       <Card.Divider />
       <View
         style={{

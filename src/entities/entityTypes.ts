@@ -27,6 +27,23 @@ export interface Character {
   };
 }
 
+export interface ComicViewModel {
+  id: number;
+  title: string;
+  issueNumber: number;
+  description: string;
+  modified: string;
+  pageCount: number;
+  onsaleDate: string;
+  focDate: string;
+  printPrice: number | undefined;
+  digitalPurchasePrice: number | undefined;
+  thumbnail: string;
+  creators: string[];
+  characters: string[];
+  stories: string[];
+}
+
 export interface Comic {
   id: number;
   digitalId: number;

@@ -3,23 +3,26 @@ import moment from 'moment';
 import React from 'react';
 import {Linking, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {Avatar, Icon} from 'react-native-elements';
-import {Character, Comic, Organization} from '../../entities/entityTypes';
+import {
+  Character,
+  Comic,
+  ComicViewModel,
+  Organization,
+} from '../../entities/entityTypes';
 
 interface IProp {
   index: number;
-  comic: Comic;
+  comic: ComicViewModel;
 }
 export const ComicRowView = observer(({index, comic}: IProp) => {
   // const repoUrl = `https://github.com/${organization.login}`;
   // const _opacity = organization.isRead ? 0.3 : 1;
-  const imageUrl = comic?.thumbnail
-    ? `${comic.thumbnail.path}.${comic.thumbnail.extension}`
-    : '';
+  const imageUrl = comic.thumbnail;
   return (
     <View style={styles.container}>
       <Avatar size={64} rounded source={imageUrl ? {uri: imageUrl} : {}} />
       <View style={[styles.subContainer]}>
-        <Text style={styles.name}>{`#${index} ` + comic.title}</Text>
+        <Text numberOfLines={1} style={styles.name}>{`#${index} ` + comic.title}</Text>
         {/* <TouchableOpacity
           onPress={() => {
             Linking.openURL(repoUrl);
@@ -35,17 +38,15 @@ export const ComicRowView = observer(({index, comic}: IProp) => {
             flexDirection: 'row',
             justifyContent: 'space-between',
           }}>
-          {comic.prices?.map((p, i) => {
-            let type = 'print';
-            if (p.type == 'printPrice') type = 'print';
-            else if (p.type == 'digitalPurchasePrice') type = 'digital';
-            else return null;
-            return (
-              <Text
-                key={'p' + i}
-                style={styles.desc}>{`${type}: $${p.price}`}</Text>
-            );
-          })}
+          {typeof comic.printPrice === 'number' && (
+            <Text style={styles.desc}>{`Print: $${comic.printPrice}`}</Text>
+          )}
+          {typeof comic.digitalPurchasePrice === 'number' && (
+            <Text
+              style={
+                styles.desc
+              }>{`Digital: $${comic.digitalPurchasePrice}`}</Text>
+          )}
         </View>
         <View
           style={{
@@ -56,21 +57,16 @@ export const ComicRowView = observer(({index, comic}: IProp) => {
             flexDirection: 'row',
             justifyContent: 'space-between',
           }}>
-          {comic.dates?.map((d, i) => {
-            let type = 'OnSale';
-            if(moment(d.date).isValid()){
-              if (d.type == 'onsaleDate') type = 'OnSale';
-              else if (d.type == 'focDate') type = 'FOC';
-              else return null;
-            }
-            else return null
-           
-            return (
-              <Text key={'d' + i} style={styles.desc}>{`${type}: ${moment(
-                d.date,
-              ).format('ll')}`}</Text>
-            );
-          })}
+          {!!comic.onsaleDate && (
+            <Text style={styles.desc}>{`OnSale: ${moment(
+              comic.onsaleDate,
+            ).format('ll')}`}</Text>
+          )}
+          {!!comic.focDate && (
+            <Text style={styles.desc}>{`FOC: ${moment(comic.focDate).format(
+              'll',
+            )}`}</Text>
+          )}
         </View>
       </View>
     </View>
