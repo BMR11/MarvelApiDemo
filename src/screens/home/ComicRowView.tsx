@@ -35,7 +35,7 @@ export const ComicRowView = observer(({index, comic}: IProp) => {
             marginTop: 5,
             padding: 3,
             borderRadius: 4,
-            backgroundColor: '#333333aa',
+            // backgroundColor: '#333333aa',
             flexDirection: 'row',
             justifyContent: 'space-between',
           }}>
@@ -54,7 +54,7 @@ export const ComicRowView = observer(({index, comic}: IProp) => {
             marginTop: 5,
             padding: 3,
             borderRadius: 4,
-            backgroundColor: '#333333aa',
+            // backgroundColor: '#333333aa',
             flexDirection: 'row',
             justifyContent: 'space-between',
           }}>
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 5,
     margin: 5,
-    backgroundColor: '#54BAB9',
+    backgroundColor: '#154c79',
     borderRadius: 8,
     flexDirection: 'row',
   },
@@ -92,6 +92,6 @@ const styles = StyleSheet.create({
   },
   name: {fontSize: 14, color: 'white',fontFamily:FontFamily.bold},
   repoUrl: {color: 'blue', textDecorationLine: 'underline'},
-  desc: {color: '#F5EEDC' ,fontFamily:FontFamily.bold},
+  desc: {color: '#F5EEDC' ,fontFamily:FontFamily.regular},
   readIndicatorContainer: {position: 'absolute', right: 0, top: 0, zIndex: 999},
 });

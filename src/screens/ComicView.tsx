@@ -38,9 +38,12 @@ export const ComicView = () => {
             width: 150,
             alignSelf: 'center',
             borderRadius: 5,
-            borderWidth: 3,
+            borderWidth: 2,
+            backgroundColor:'white',
+            padding:3
           }}>
           <Image
+            containerStyle={{borderRadius:3}}
             source={{uri: imageUrl}}
             style={{height: 200}}
             resizeMode={'stretch'}
@@ -53,7 +56,7 @@ export const ComicView = () => {
             marginTop: -100,
             borderColor: '#333333',
             borderRadius: 5,
-            borderWidth: 3,
+            borderWidth: 2,
             padding: 5,
           }}>
           <View style={{height: 100}} />
