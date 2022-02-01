@@ -4,7 +4,6 @@ import {useNavigation} from '@react-navigation/native';
 import {observer} from 'mobx-react-lite';
 import React, {useEffect, useRef, useState} from 'react';
 import {
-  FlatList,
   RefreshControl,
   StyleSheet,
   TouchableOpacity,
@@ -20,8 +19,9 @@ import {NavScreenKeys} from '../AppNavigator';
 import {ComicRowView} from './ComicRowView';
 import {LoadingView} from './LoadingView';
 import {LoadMoreLoadingView} from './LoadMoreLoadingView';
+import BigList from 'react-native-big-list';
 
-export const ITEM_HEIGHT = 88;
+export const ITEM_HEIGHT = 100;
 
 export const ComicListScreen = observer(() => {
   const netInfo = useNetInfo();
@@ -44,11 +44,6 @@ export const ComicListScreen = observer(() => {
   }, [netInfo.isInternetReachable, netInfo.isConnected]);
 
   useEffect(() => {
-    // getRealm().then(realm => {
-    //   realm.write(() => {
-    //     realm.deleteAll();
-    //   });
-    // });
     setTimeout(() => {
       if (isOfflineRef.current) {
         loadFromDb();
@@ -104,8 +99,6 @@ export const ComicListScreen = observer(() => {
     } catch (error: any) {
       console.error(error);
     }
-
-    console.warn('ComicSchemaName', realm.objects(ComicSchemaName).length);
   };
 
   const fetchListData = async (
@@ -129,7 +122,6 @@ export const ComicListScreen = observer(() => {
 
       if (resp.data) {
         const data: Comic[] = resp.data.data.results;
-        console.warn('fetchListData', _offset, _length, data.length);
 
         const comicViewModels: ComicViewModel[] = data.map(c => {
           let _onsaleDate =
@@ -186,9 +178,9 @@ export const ComicListScreen = observer(() => {
     setIsLoading(false);
   };
 
-  useEffect(() => {
-    navigation.setOptions({title: `Comics(${listData.length})`});
-  }, [listData]);
+  // useEffect(() => {
+  //   navigation.setOptions({title: `Comics(${listData.length})`});
+  // }, [listData]);
 
   const onEndReached = () => {
     setHasMore(true);
@@ -215,10 +207,12 @@ export const ComicListScreen = observer(() => {
             </>
           ) : (
             <>
-              <Text style={styles.text}>
+              {/* <Text style={styles.text}>
                 {isOfflineRef.current ? 'OFFLINE' : 'ONLINE'}
-              </Text>
-              <FlatList
+              </Text> */}
+              <BigList
+                footerHeight={80}
+                itemHeight={ITEM_HEIGHT}
                 refreshControl={
                   <RefreshControl
                     refreshing={refreshing}

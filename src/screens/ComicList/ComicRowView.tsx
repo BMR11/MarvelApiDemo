@@ -5,6 +5,7 @@ import {StyleSheet, Text, View} from 'react-native';
 import {Avatar} from 'react-native-elements';
 import {FontFamily} from '../../constants/constants';
 import {ComicViewModel} from '../../entities/entityTypes';
+import { ITEM_HEIGHT } from './ComicListScreen';
 
 interface IProp {
   index: number;
@@ -69,16 +70,18 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 5,
+    padding: 10,
     margin: 5,
     backgroundColor: '#154c79',
     borderRadius: 8,
     flexDirection: 'row',
+    height:ITEM_HEIGHT-5,
   },
   subContainer: {
     height: '100%',
     flex: 1,
     marginLeft: 5,
+    justifyContent:'center'
     // marginRight: 5,
   },
   name: {fontSize: 14, color: 'white', fontFamily: FontFamily.bold},

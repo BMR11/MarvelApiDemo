@@ -6367,6 +6367,13 @@
   "resolved" "https://registry.npmjs.org/react-is/-/react-is-16.13.1.tgz"
   "version" "16.13.1"
 
+"react-native-big-list@^1.5.2":
+  "integrity" "sha512-L0pwQu0GqrHFwaAsJyvK2MwODtzyp3NnCqIm/YJxcgPGVniIyQMAJOeQvhIYhfteVpu3EGdMtz4lhx5Nm6nf7w=="
+  "resolved" "https://registry.npmjs.org/react-native-big-list/-/react-native-big-list-1.5.2.tgz"
+  "version" "1.5.2"
+  dependencies:
+    "prop-types" "^15.7.2"
+
 "react-native-codegen@^0.0.7":
   "integrity" "sha512-dwNgR8zJ3ALr480QnAmpTiqvFo+rDtq6V5oCggKhYFlRjzOmVSFn3YD41u8ltvKS5G2nQ8gCs2vReFFnRGLYng=="
   "resolved" "https://registry.npmjs.org/react-native-codegen/-/react-native-codegen-0.0.7.tgz"

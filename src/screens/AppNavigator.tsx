@@ -25,7 +25,11 @@ export const AppNavigator = () => {
       <RootStack.Screen
         name={NavScreenKeys.ComicListScreen}
         component={ComicListScreen}
-        options={{headerTitleAlign: 'center'}}
+        // options={{headerTitleAlign: 'center'}}
+        options={({route}) => ({
+          title: 'Comics',
+          headerTitleAlign: 'center'
+        })}
       />
       <RootStack.Screen
         name={NavScreenKeys.ComicDetailScreen}
