@@ -1,23 +1,16 @@
 import {observer} from 'mobx-react-lite';
 import moment from 'moment';
 import React from 'react';
-import {Linking, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import {Avatar, Icon} from 'react-native-elements';
+import {StyleSheet, Text, View} from 'react-native';
+import {Avatar} from 'react-native-elements';
 import {FontFamily} from '../../constants/constants';
-import {
-  Character,
-  Comic,
-  ComicViewModel,
-  Organization,
-} from '../../entities/entityTypes';
+import {ComicViewModel} from '../../entities/entityTypes';
 
 interface IProp {
   index: number;
   comic: ComicViewModel;
 }
 export const ComicRowView = observer(({index, comic}: IProp) => {
-  // const repoUrl = `https://github.com/${organization.login}`;
-  // const _opacity = organization.isRead ? 0.3 : 1;
   const imageUrl = comic.thumbnail;
   return (
     <View style={styles.container}>
@@ -26,12 +19,6 @@ export const ComicRowView = observer(({index, comic}: IProp) => {
         <Text numberOfLines={1} style={styles.name}>
           {`#${index} ` + comic.title}
         </Text>
-        {/* <TouchableOpacity
-          onPress={() => {
-            Linking.openURL(repoUrl);
-          }}>
-          <Text style={styles.repoUrl}>{repoUrl}</Text>
-        </TouchableOpacity> */}
         <View
           style={{
             marginTop: 5,

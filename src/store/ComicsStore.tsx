@@ -1,10 +1,8 @@
 import {action, makeObservable, observable, runInAction} from 'mobx';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {RootStore} from './RootStore';
-import {ComicViewModel, Organization} from '../entities/entityTypes';
-import {OrganizationsApi} from '../api/organizationsApi';
-
-const ASYNC_KEY_ORG_READ_IDS = 'org-read-ids';
+import {Comic, ComicViewModel} from '../entities/entityTypes';
+import {getComics} from '../api/marvelApi';
+import {ComicSchemaName, getRealm} from '../database/realm';
 
 export class ComicsStore {
   comics: ComicViewModel[] = [];
@@ -18,63 +16,118 @@ export class ComicsStore {
       comics: observable,
       error: observable,
 
-      getAll: action,
-      persistIsReadForOrgId: action,
-      markRead: action,
+      fetchComics: action,
+      loadFromDb: action,
+      writeTodb: action,
     });
   }
 
-  markRead = (orgId: number) => {
-    const index = this.comics.findIndex(o => o.id === orgId);
-    if (index > -1) {
-      this.comics[index].isRead = true;
-      this.persistIsReadForOrgId(orgId);
-    }
-  };
-
-  //We can use on device sqlite db here but considering small usecase, async should work here.
-  persistIsReadForOrgId = async (orgId: number) => {
-    AsyncStorage.getItem(ASYNC_KEY_ORG_READ_IDS).then(data => {
-      let _listOfReadIds: number[] = [];
-      if (data) {
-        _listOfReadIds = JSON.parse(data);
-      }
-      _listOfReadIds.push(orgId);
-      AsyncStorage.setItem(
-        ASYNC_KEY_ORG_READ_IDS,
-        JSON.stringify(_listOfReadIds),
-      );
-    });
-  };
-
-  getAll = async (startId: number) => {
-    this.error = '';
+  writeTodb = async (newComics: ComicViewModel[]) => {
+    const realm = await getRealm();
+    let updatedComics: any[] = [];
     try {
-      const response = await OrganizationsApi.getAll(startId);
-      if (response.data) {
-        runInAction(() => {
-          this.comics = [...this.comics, ...response.data];
+      realm.write(() => {
+        newComics.forEach(c => {
+          updatedComics.push(
+            realm.create(
+              ComicSchemaName,
+              {
+                _id: c.id,
+                title: c.title,
+                issueNumber: c.issueNumber,
+                description: c.description,
+                modified: c.modified,
+                pageCount: c.pageCount,
+                onsaleDate: c.onsaleDate,
+                focDate: c.focDate,
+                printPrice: c.printPrice,
+                digitalPurchasePrice: c.digitalPurchasePrice,
+                thumbnail: c.thumbnail,
+                creators: c.creators,
+                characters: c.characters,
+                stories: c.stories,
+              },
+              'modified',
+            ),
+          );
         });
-      }
-      await this.restoreIsReadIds();
+      });
     } catch (error) {
-      // console.error('OrganizationsApi.getAll', error);
-      this.error = '' + error;
+      console.error(error);
     }
+
+    // console.warn('ComicSchemaName', realm.objects(ComicSchemaName).length);
   };
 
-  restoreIsReadIds = async () => {
-    const data = await AsyncStorage.getItem(ASYNC_KEY_ORG_READ_IDS);
-    if (data) {
-      const list: number[] = JSON.parse(data);
-      runInAction(() => {
-        if (list.length > 0) {
-          this.comics = this.comics.map(o => {
-            if (list?.includes(o.id)) return {...o, isRead: true};
-            else return {...o};
-          });
-        }
-      });
+  loadFromDb = async () => {
+    const realm = await getRealm();
+    const dbData: ComicViewModel[] = await realm.objects(ComicSchemaName);
+    // console.warn('end', dbData.length);
+
+    this.comics = dbData;
+  };
+
+  fetchComics = async (
+    _offset: number,
+    _length: number,
+    shouldAppend = false,
+  ) => {
+    this.error = '';
+    console.warn('fetchComics');
+    try {
+      const response = await getComics(_offset, _length);
+      console.warn('fetchComics2');
+      if (response.data) {
+        console.warn('fetchComics3');
+
+        const data: Comic[] = response.data.data.results;
+
+        const comicViewModels: ComicViewModel[] = data.map(c => {
+          let _onsaleDate =
+            c.dates?.find(d => d.type === 'onsaleDate')?.date ?? '';
+          let _focDate = c.dates?.find(d => d.type === 'focDate')?.date ?? '';
+          let _printPrice =
+            c.prices?.find(d => d.type === 'printPrice')?.price ?? undefined;
+          let _digitalPurchasePrice =
+            c.prices?.find(d => d.type === 'digitalPurchasePrice')?.price ??
+            undefined;
+          let _thumbnail = c.thumbnail?.path + '.' + c.thumbnail.extension;
+
+          const _creators = c.creators?.items?.map(_c => _c.name) ?? [];
+          const _characters = c.characters?.items?.map(_c => _c.name) ?? [];
+          const _stories = c.stories?.items?.map(_c => _c.name) ?? [];
+
+          return {
+            id: c.id,
+            title: c.title,
+            issueNumber: c.issueNumber,
+            description: c.description,
+            modified: c.modified,
+            pageCount: c.pageCount,
+            onsaleDate: _onsaleDate,
+            focDate: _focDate,
+            printPrice: _printPrice,
+            digitalPurchasePrice: _digitalPurchasePrice,
+            thumbnail: _thumbnail,
+            creators: _creators,
+            characters: _characters,
+            stories: _stories,
+          };
+        });
+
+        runInAction(() => {
+          // console.warn(_offset,_length,shouldAppend,data.length,this.comics.length,comicViewModels.length)
+          if (shouldAppend) {
+            this.comics = [...this.comics, ...comicViewModels];
+          } else {
+            this.comics = [...comicViewModels];
+          }
+        });
+
+        await this.writeTodb(comicViewModels);
+      }
+    } catch (error) {
+      this.error = '' + error;
     }
   };
 }

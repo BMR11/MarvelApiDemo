@@ -21,7 +21,7 @@ import {MyColors} from './src/constants/constants';
 import {AppNavigator} from './src/screens/AppNavigator';
 import {RootStore} from './src/store/RootStore';
 const rootStore = new RootStore();
-export const organizationStore = rootStore.organizationStore;
+export const comicsStore = rootStore.comicsStore;
 
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';

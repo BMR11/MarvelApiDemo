@@ -47,13 +47,13 @@ export const ComicListScreen = observer(() => {
 
   useEffect(() => {
     setTimeout(() => {
-       if (isOfflineRef.current) {
-      loadFromDb();
-    } else {
-      fetchListData('mnt');
-    }
+      if (isOfflineRef.current) {
+        loadFromDb();
+      } else {
+        fetchListData(0, 25);
+      }
     }, 500);
-   
+
     return () => {};
   }, []);
 
@@ -103,8 +103,7 @@ export const ComicListScreen = observer(() => {
     console.warn('ComicSchemaName', realm.objects(ComicSchemaName).length);
   };
 
-  const fetchListData = async (caller = '') => {
-    console.warn('fetchListData', caller);
+  const fetchListData = async (_offset: number, _length: number, shouldAppend = false) => {
     if (isOfflineRef.current) {
       Toast.show({
         type: 'error',
@@ -116,10 +115,12 @@ export const ComicListScreen = observer(() => {
       return;
     }
 
-    const resp = await getComics(listData.length);
+    const resp = await getComics(_offset, _length);
 
     if (resp.data) {
       const data: Comic[] = resp.data.data.results;
+      console.warn('fetchListData', _offset, _length,data.length);
+
       const comicViewModels: ComicViewModel[] = data.map(c => {
         let _onsaleDate =
           c.dates?.find(d => d.type === 'onsaleDate')?.date ?? '';
@@ -154,7 +155,8 @@ export const ComicListScreen = observer(() => {
       });
 
       writeTodb(comicViewModels);
-      if (caller == 'end') {
+
+      if (shouldAppend) {
         setlListData([...listData, ...comicViewModels]);
       } else {
         setlListData(comicViewModels);
@@ -169,7 +171,7 @@ export const ComicListScreen = observer(() => {
 
   const onEndReached = () => {
     setHasMore(true);
-    fetchListData('end');
+    fetchListData(listData.length, 25, true);
   };
 
   return (
@@ -186,7 +188,7 @@ export const ComicListScreen = observer(() => {
               <Button
                 style={styles.retryButton}
                 title={'Retry'}
-                onPress={() => fetchListData('ret')}
+                onPress={() => fetchListData(0, listData.length)}
               />
             </>
           ) : (
@@ -199,7 +201,7 @@ export const ComicListScreen = observer(() => {
                   <RefreshControl
                     refreshing={refreshing}
                     onRefresh={() => {
-                      fetchListData('ref');
+                      fetchListData(0, listData.length);
                     }}
                   />
                 }

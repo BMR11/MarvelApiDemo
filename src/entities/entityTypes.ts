@@ -1,31 +1,4 @@
-export interface Organization {
-  login: string;
-  id: number;
-  node_id: string;
-  url: string;
-  repos_url: string;
-  events_url: string;
-  hooks_url: string;
-  issues_url: string;
-  members_url: string;
-  public_members_url: string;
-  avatar_url: string;
-  description: null | string;
-  isRead: boolean;
-}
 
-export interface Character {
-  id: number;
-  name: string;
-  description: string;
-  thumbnail: {
-    path: string;
-    extension: string;
-  };
-  comics: {
-    available: number;
-  };
-}
 
 export interface ComicViewModel {
   id: number;
