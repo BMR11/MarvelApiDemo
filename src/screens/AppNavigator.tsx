@@ -16,7 +16,7 @@ export const AppNavigator = () => {
       initialRouteName={NavScreenKeys.ComicListScreen}
       screenOptions={{
         headerStyle: {
-          backgroundColor: MyColors.bgColor,
+          backgroundColor: MyColors.offWhite,
         },
         headerTitleStyle: {
           fontWeight: 'bold',

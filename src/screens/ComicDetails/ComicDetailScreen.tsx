@@ -124,7 +124,7 @@ const MyCard = ({title, children}: {title: string; children: any}) => {
 };
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: MyColors.bgColor, padding: 8},
+  container: {flex: 1, backgroundColor: MyColors.offWhite, padding: 8},
   imageBackground: {
     top: 0,
     left: 0,
@@ -172,16 +172,16 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderRadius: 5,
     borderWidth: 2,
-    backgroundColor: 'white',
+    backgroundColor: MyColors.white,
     padding: 3,
   },
   headerText: {
-    color: MyColors.bgColor,
+    color: MyColors.offWhite,
     fontFamily: FontFamily.bold,
     fontSize: 16,
   },
   text: {
-    color: MyColors.bgColor,
+    color: MyColors.offWhite,
     fontFamily: FontFamily.regular,
     fontSize: 14,
     textAlign: 'center',
@@ -192,15 +192,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     alignSelf: 'center',
     margin: 5,
-    color: 'black',
+    color: MyColors.black,
   },
-  name: {fontSize: 14, color: 'white', fontFamily: FontFamily.bold},
-  repoUrl: {color: 'blue', textDecorationLine: 'underline'},
-  desc: {color: '#F5EEDC', fontFamily: FontFamily.bold},
-  readIndicatorContainer: {position: 'absolute', right: 0, top: 0, zIndex: 999},
+  name: {fontSize: 14, color: MyColors.white, fontFamily: FontFamily.bold},
+  desc: {color: MyColors.offWhite, fontFamily: FontFamily.bold},
 
   cardContainer: {
-    backgroundColor: '#333333dd',
+    backgroundColor: MyColors.transGray,
     borderWidth: 0,
     borderRadius: 5,
   },
@@ -209,7 +207,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cardHeaderText: {
-    color: MyColors.bgColor,
+    color: MyColors.offWhite,
     fontFamily: FontFamily.bold,
     fontSize: 16,
     alignSelf: 'center',

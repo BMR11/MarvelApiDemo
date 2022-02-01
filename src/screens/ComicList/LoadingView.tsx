@@ -1,7 +1,7 @@
 import React from 'react';
 import LottieView from 'lottie-react-native';
 import {StyleSheet, Text, View} from 'react-native';
-import {FontFamily} from '../../constants/constants';
+import {FontFamily, MyColors} from '../../constants/constants';
 
 export const LoadingView = ({label = 'Loading...'}: {label?: string}) => {
   return (
@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     fontSize: 25,
     textAlign: 'center',
     margin: 15,
-    color: 'black',
+    color: MyColors.black,
     fontFamily: FontFamily.bold,
   },
 });

@@ -4,6 +4,7 @@ import {Comic, ComicViewModel} from '../entities/entityTypes';
 import {getComics} from '../api/marvelApi';
 import {ComicSchemaName, getRealm} from '../database/realm';
 
+//Note: Currently not used but can be used as we have more stores and want more complex flow
 export class ComicsStore {
   comics: ComicViewModel[] = [];
   rootStore: RootStore;
@@ -73,12 +74,9 @@ export class ComicsStore {
     shouldAppend = false,
   ) => {
     this.error = '';
-    console.warn('fetchComics');
     try {
       const response = await getComics(_offset, _length);
-      console.warn('fetchComics2');
       if (response.data) {
-        console.warn('fetchComics3');
 
         const data: Comic[] = response.data.data.results;
 
@@ -116,7 +114,6 @@ export class ComicsStore {
         });
 
         runInAction(() => {
-          // console.warn(_offset,_length,shouldAppend,data.length,this.comics.length,comicViewModels.length)
           if (shouldAppend) {
             this.comics = [...this.comics, ...comicViewModels];
           } else {

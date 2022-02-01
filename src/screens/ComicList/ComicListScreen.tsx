@@ -1,14 +1,10 @@
+/* eslint-disable no-catch-shadow */
 /* eslint-disable react-hooks/exhaustive-deps */
 import {useNetInfo} from '@react-native-community/netinfo';
 import {useNavigation} from '@react-navigation/native';
 import {observer} from 'mobx-react-lite';
 import React, {useEffect, useRef, useState} from 'react';
-import {
-  RefreshControl,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {RefreshControl, StyleSheet, TouchableOpacity, View} from 'react-native';
 import {Button, Text} from 'react-native-elements';
 import Toast from 'react-native-toast-message';
 import {getComics} from '../../api/marvelApi';
@@ -22,6 +18,7 @@ import {LoadMoreLoadingView} from './LoadMoreLoadingView';
 import BigList from 'react-native-big-list';
 
 export const ITEM_HEIGHT = 100;
+export const RECORD_COUNT_PER_FETCH = 25;
 
 export const ComicListScreen = observer(() => {
   const netInfo = useNetInfo();
@@ -33,10 +30,12 @@ export const ComicListScreen = observer(() => {
 
   const [listData, setlListData] = useState<ComicViewModel[]>([]);
 
+  //Need to take this as ref so it can be accessed within callback closure
   const isOfflineRef = useRef(
     !(netInfo.isConnected && netInfo.isInternetReachable),
   );
 
+  //Update when network condition changes
   useEffect(() => {
     isOfflineRef.current = !(
       netInfo.isConnected && netInfo.isInternetReachable
@@ -48,13 +47,14 @@ export const ComicListScreen = observer(() => {
       if (isOfflineRef.current) {
         loadFromDb();
       } else {
-        fetchListData(0, 25);
+        fetchListData(0, RECORD_COUNT_PER_FETCH);
       }
-    }, 500);
+    }, 500); // Needed to put delay here as netInfo lib having a bug where it wont update status immedietly
 
     return () => {};
   }, []);
 
+  
   const loadFromDb = async () => {
     const realm = await getRealm();
     const dbData: ComicViewModel[] = await realm.objects(ComicSchemaName);
@@ -164,7 +164,7 @@ export const ComicListScreen = observer(() => {
           setlListData(comicViewModels);
         }
       }
-    } catch (error) {
+    } catch (err: any) {
       Toast.show({
         type: 'error',
         text1: 'Network error',
@@ -184,7 +184,7 @@ export const ComicListScreen = observer(() => {
 
   const onEndReached = () => {
     setHasMore(true);
-    fetchListData(listData.length, 25, true);
+    fetchListData(listData.length, RECORD_COUNT_PER_FETCH, true);
   };
 
   return (
@@ -255,7 +255,7 @@ export const ComicListScreen = observer(() => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: MyColors.bgColor,
+    backgroundColor: MyColors.offWhite,
     flex: 1,
     justifyContent: 'center',
   },

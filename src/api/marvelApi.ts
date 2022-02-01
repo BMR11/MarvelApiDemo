@@ -1,6 +1,7 @@
 import axios, {AxiosResponse} from 'axios';
 import md5 from 'md5';
 import {Comic} from '../entities/entityTypes';
+import { RECORD_COUNT_PER_FETCH } from '../screens/ComicList/ComicListScreen';
 
 const ts = 'marvel-api';
 const publicKey = '764d0a59d47c833643c3582985e255ed';
@@ -19,8 +20,8 @@ const api = axios.create({
 
 export const getComics = (
   _offset = 0,
-  _limit = 25,
-): Promise<AxiosResponse<Comic[]>> => {
+  _limit = RECORD_COUNT_PER_FETCH,
+): Promise<AxiosResponse<any[]>> => {
   return api.get('/v1/public/comics', {
     params: {
       ...apiKey,

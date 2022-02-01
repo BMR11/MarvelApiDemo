@@ -1,6 +1,7 @@
 import Realm from 'realm';
 
 export const ComicSchemaName = 'Comic';
+const RealmDbPath = 'myrlm';
 const ComicSchema = {
   name: ComicSchemaName,
   properties: {
@@ -24,7 +25,7 @@ const ComicSchema = {
 
 export const getRealm = async () => {
   return await Realm.open({
-    path: 'myrlm',
+    path: 'RealmDbPath',
     schema: [ComicSchema],
   });
 };

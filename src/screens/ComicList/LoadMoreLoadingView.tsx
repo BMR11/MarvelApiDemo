@@ -21,7 +21,6 @@ const styles = StyleSheet.create({
     position: 'relative',
     marginTop: 10,
     marginBottom: 10,
-    borderColor: 'pink',
   },
   lottieAnim: {width: 50, alignSelf: 'center'},
 });
