@@ -43,22 +43,25 @@ export const ComicListScreen = observer(() => {
   }, [netInfo.isInternetReachable, netInfo.isConnected]);
 
   useEffect(() => {
-    setTimeout(() => {
-      if (isOfflineRef.current) { // We want to show db data when offline
+    const timeout = setTimeout(() => {
+      if (isOfflineRef.current) {
+        // We want to show db data when offline
         loadFromDb();
       } else {
         fetchListData(0, RECORD_COUNT_PER_FETCH);
       }
     }, 500); // Needed to put delay here as netInfo lib having a bug where it wont update status immedietly
 
-    return () => {};
+    return () => {
+      clearTimeout(timeout);
+    };
   }, []);
 
-  
   const loadFromDb = async () => {
     const realm = await getRealm();
     const dbData: ComicViewModel[] = await realm.objects(ComicSchemaName);
-    if (dbData.length == 0) { // This is when we even not having db data.
+    if (dbData.length == 0) {
+      // This is when we even not having db data.
       setError('No Data');
     }
 
