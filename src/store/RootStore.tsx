@@ -1,8 +1,8 @@
-import {OrganizationStore} from './OrganizationStore';
+import {ComicsStore} from './ComicsStore';
 
 export class RootStore {
-  organizationStore: OrganizationStore;
+  comicsStore: ComicsStore;
   constructor() {
-    this.organizationStore = new OrganizationStore(this);
+    this.comicsStore = new ComicsStore(this);
   }
 }

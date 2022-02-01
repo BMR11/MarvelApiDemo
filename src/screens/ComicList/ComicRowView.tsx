@@ -3,7 +3,7 @@ import moment from 'moment';
 import React from 'react';
 import {Linking, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {Avatar, Icon} from 'react-native-elements';
-import { FontFamily } from '../../constants/constants';
+import {FontFamily} from '../../constants/constants';
 import {
   Character,
   Comic,
@@ -23,7 +23,9 @@ export const ComicRowView = observer(({index, comic}: IProp) => {
     <View style={styles.container}>
       <Avatar size={64} rounded source={imageUrl ? {uri: imageUrl} : {}} />
       <View style={[styles.subContainer]}>
-        <Text numberOfLines={1} style={styles.name}>{`#${index} ` + comic.title}</Text>
+        <Text numberOfLines={1} style={styles.name}>
+          {`#${index} ` + comic.title}
+        </Text>
         {/* <TouchableOpacity
           onPress={() => {
             Linking.openURL(repoUrl);
@@ -40,7 +42,9 @@ export const ComicRowView = observer(({index, comic}: IProp) => {
             justifyContent: 'space-between',
           }}>
           {typeof comic.printPrice === 'number' && (
-            <Text style={styles.desc}>{`Print: $${comic.printPrice.toFixed(2)}`}</Text>
+            <Text style={styles.desc}>{`Print: $${comic.printPrice.toFixed(
+              2,
+            )}`}</Text>
           )}
           {typeof comic.digitalPurchasePrice === 'number' && (
             <Text
@@ -63,7 +67,7 @@ export const ComicRowView = observer(({index, comic}: IProp) => {
               comic.onsaleDate,
             ).format('ll')}`}</Text>
           )}
-          {!!comic.focDate &&  moment(comic.focDate).isValid() && (
+          {!!comic.focDate && moment(comic.focDate).isValid() && (
             <Text style={styles.desc}>{`FOC: ${moment(comic.focDate).format(
               'll',
             )}`}</Text>
@@ -90,8 +94,8 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     // marginRight: 5,
   },
-  name: {fontSize: 14, color: 'white',fontFamily:FontFamily.bold},
+  name: {fontSize: 14, color: 'white', fontFamily: FontFamily.bold},
   repoUrl: {color: 'blue', textDecorationLine: 'underline'},
-  desc: {color: '#F5EEDC' ,fontFamily:FontFamily.regular},
+  desc: {color: '#F5EEDC', fontFamily: FontFamily.regular},
   readIndicatorContainer: {position: 'absolute', right: 0, top: 0, zIndex: 999},
 });

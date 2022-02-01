@@ -1,8 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import {useNetInfo} from '@react-native-community/netinfo';
+import {useNavigation} from '@react-navigation/native';
 import {observer} from 'mobx-react-lite';
 import React, {useEffect, useState} from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   RefreshControl,
   StyleSheet,
@@ -10,63 +11,46 @@ import {
   View,
 } from 'react-native';
 import {Button, Text} from 'react-native-elements';
+import Toast from 'react-native-toast-message';
 import {getComics} from '../../api/marvelApi';
-import {Comic, ComicViewModel} from '../../entities/entityTypes';
-import {ComicView} from '../ComicView';
-import {ComicRowView} from './ComicRowView';
-// import {organizationStore} from '../../../App';
-// import {OrganizationRawView} from './OrganizationRawView';
-import LottieView from 'lottie-react-native';
-import {useNavigation} from '@react-navigation/native';
 import {MyColors} from '../../constants/constants';
 import {ComicSchemaName, getRealm} from '../../database/realm';
-import {useNetInfo} from '@react-native-community/netinfo';
-import Toast from 'react-native-toast-message';
+import {Comic, ComicViewModel} from '../../entities/entityTypes';
+import {NavScreenKeys} from '../AppNavigator';
+import {ComicRowView} from './ComicRowView';
+import {LoadingView} from './LoadingView';
+import {LoadMoreLoadingView} from './LoadMoreLoadingView';
 
 export const ITEM_HEIGHT = 88;
 
-export const HomeScreenMarvel = observer(() => {
+export const ComicListScreen = observer(() => {
   const netInfo = useNetInfo();
   const navigation = useNavigation();
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState();
   const [hasMore, setHasMore] = useState(false);
 
   const [listData, setlListData] = useState<ComicViewModel[]>([]);
 
-  const [selectedComic, setSelectedComic] = useState<Comic | null>(null);
-
-  const isOffline = !(netInfo.isConnected && netInfo.isInternetReachable);
-  // const onRefresh = React.useCallback(async () => {
-  //   await loadOrganizations();
-  // }, []);
-
-  // useEffect(() => {
-  //   loadOrganizations();
-  // }, [startId]);
-
-  // useEffect(() => {
-  //   if (organizationStore.organizations.length > 0) {
-  //     setStartId(
-  //       organizationStore.organizations[
-  //         organizationStore.organizations.length - 1
-  //       ].id,
-  //     );
-  //   }
-  // }, [organizationStore.organizations]);
+  const isOffline = 
+  netInfo.isConnected != null &&
+  netInfo.isInternetReachable != null &&
+  !(netInfo.isConnected && netInfo.isInternetReachable);
 
   useEffect(() => {
-    if (isOffline) loadFromDb();
-    else loadOrganizations('mnt');
-
+    if (isOffline) {
+      loadFromDb();
+    } else {
+      fetchListData('mnt');
+    }
     return () => {};
   }, []);
 
   const loadFromDb = async () => {
     const realm = await getRealm();
-    const dbdata = await realm.objects(ComicSchemaName);
-    setlListData(dbdata);
+    const dbData: ComicViewModel[] = await realm.objects(ComicSchemaName);
+    setlListData(dbData);
     setIsLoading(false);
   };
 
@@ -106,10 +90,10 @@ export const HomeScreenMarvel = observer(() => {
 
     // console.warn('end', updatedComics);
     console.warn('ComicSchemaName', realm.objects(ComicSchemaName).length);
-
   };
 
-  const loadOrganizations = async (caller) => {
+  const fetchListData = async (caller = '') => {
+    console.warn('fetchListData', caller);
     if (isOffline) {
       Toast.show({
         type: 'error',
@@ -121,11 +105,7 @@ export const HomeScreenMarvel = observer(() => {
       return;
     }
 
-    // setIsLoading(true);
-    // console.warn(listData.length)
-    // console.warn('loadOrganizations1',caller)
     const resp = await getComics(listData.length);
-    // console.warn('loadOrganizations2',caller)
 
     if (resp.data) {
       const data: Comic[] = resp.data.data.results;
@@ -163,11 +143,11 @@ export const HomeScreenMarvel = observer(() => {
       });
 
       writeTodb(comicViewModels);
-      if(caller == 'end')
-      setlListData([...listData, ...comicViewModels]);
-      else
-      setlListData(comicViewModels)
-
+      if (caller == 'end') {
+        setlListData([...listData, ...comicViewModels]);
+      } else {
+        setlListData(comicViewModels);
+      }
     }
     setIsLoading(false);
   };
@@ -178,32 +158,13 @@ export const HomeScreenMarvel = observer(() => {
 
   const onEndReached = () => {
     setHasMore(true);
-    loadOrganizations('end');
+    fetchListData('end');
   };
-
-  // if (selectedComic) {
-  //   return (
-  //     <ComicView
-  //       comic={selectedComic}
-  //       onClose={() => {
-  //         setSelectedComic(null);
-  //       }}
-  //     />
-  //   );
-  // }
 
   return (
     <View style={styles.container}>
       {isLoading ? (
-        <View style={{justifyContent: 'flex-end'}}>
-          <LottieView
-            style={{width: 100, alignSelf: 'center'}}
-            source={require('../../resources/lottie/45560-ironman-loader.json')}
-            autoPlay
-            loop
-          />
-          <Text style={styles.text}> {'Loading...'}</Text>
-        </View>
+        <LoadingView />
       ) : (
         <>
           {error ? (
@@ -214,30 +175,31 @@ export const HomeScreenMarvel = observer(() => {
               <Button
                 style={styles.retryButton}
                 title={'Retry'}
-                onPress={() => loadOrganizations('ret')}
+                onPress={() => fetchListData('ret')}
               />
             </>
           ) : (
             <>
-            <Text style={styles.text}>{isOffline ? 'OFFLINE' : 'ONLINE'}</Text>
+              <Text style={styles.text}>
+                {isOffline ? 'OFFLINE' : 'ONLINE'}
+              </Text>
               <FlatList
                 refreshControl={
                   <RefreshControl
                     refreshing={refreshing}
                     onRefresh={() => {
-                      loadOrganizations('ref');
+                      fetchListData('ref');
                     }}
                   />
                 }
                 data={listData}
                 renderItem={({item, index}) => (
                   <TouchableOpacity
-                    // style={{height: ITEM_HEIGHT}}
                     key={'kk' + index}
                     onPress={() => {
-                      // organizationStore.markRead(item.id);
-                      setSelectedComic(item);
-                      navigation.navigate('ComicDetails', {comic: item});
+                      navigation.navigate(NavScreenKeys.ComicDetailScreen, {
+                        comic: item,
+                      });
                     }}>
                     <ComicRowView index={index} comic={item} />
                   </TouchableOpacity>
@@ -251,23 +213,7 @@ export const HomeScreenMarvel = observer(() => {
                 onEndReached={onEndReached}
                 onEndReachedThreshold={0.5}
                 ListFooterComponent={() => {
-                  return hasMore ? (
-                    <View
-                      style={{
-                        height: 50,
-                        position: 'relative',
-                        marginTop:10,
-                        marginBottom: 10,
-                        borderColor: 'pink',
-                      }}>
-                      <LottieView
-                        style={{width: 50, alignSelf: 'center'}}
-                        source={require('../../resources/lottie/45560-ironman-loader.json')}
-                        autoPlay
-                        loop
-                      />
-                    </View>
-                  ) : null;
+                  return hasMore ? <LoadMoreLoadingView /> : null;
                 }}
               />
             </>

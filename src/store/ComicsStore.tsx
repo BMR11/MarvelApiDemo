@@ -1,20 +1,21 @@
 import {action, makeObservable, observable, runInAction} from 'mobx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {RootStore} from './RootStore';
-import {Organization} from '../entities/entityTypes';
+import {ComicViewModel, Organization} from '../entities/entityTypes';
 import {OrganizationsApi} from '../api/organizationsApi';
 
 const ASYNC_KEY_ORG_READ_IDS = 'org-read-ids';
 
-export class OrganizationStore {
-  organizations: Organization[] = [];
+export class ComicsStore {
+  comics: ComicViewModel[] = [];
   rootStore: RootStore;
   error: string = 'Oops... Something went wrong';
+
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
 
     makeObservable(this, {
-      organizations: observable,
+      comics: observable,
       error: observable,
 
       getAll: action,
@@ -24,9 +25,9 @@ export class OrganizationStore {
   }
 
   markRead = (orgId: number) => {
-    const index = this.organizations.findIndex(o => o.id === orgId);
+    const index = this.comics.findIndex(o => o.id === orgId);
     if (index > -1) {
-      this.organizations[index].isRead = true;
+      this.comics[index].isRead = true;
       this.persistIsReadForOrgId(orgId);
     }
   };
@@ -52,7 +53,7 @@ export class OrganizationStore {
       const response = await OrganizationsApi.getAll(startId);
       if (response.data) {
         runInAction(() => {
-          this.organizations = [...this.organizations, ...response.data];
+          this.comics = [...this.comics, ...response.data];
         });
       }
       await this.restoreIsReadIds();
@@ -68,7 +69,7 @@ export class OrganizationStore {
       const list: number[] = JSON.parse(data);
       runInAction(() => {
         if (list.length > 0) {
-          this.organizations = this.organizations.map(o => {
+          this.comics = this.comics.map(o => {
             if (list?.includes(o.id)) return {...o, isRead: true};
             else return {...o};
           });
