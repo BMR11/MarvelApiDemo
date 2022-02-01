@@ -13,7 +13,7 @@ import {
 import {Button, Text} from 'react-native-elements';
 import Toast from 'react-native-toast-message';
 import {getComics} from '../../api/marvelApi';
-import {MyColors} from '../../constants/constants';
+import {FontFamily, MyColors} from '../../constants/constants';
 import {ComicSchemaName, getRealm} from '../../database/realm';
 import {Comic, ComicViewModel} from '../../entities/entityTypes';
 import {NavScreenKeys} from '../AppNavigator';
@@ -33,8 +33,6 @@ export const ComicListScreen = observer(() => {
 
   const [listData, setlListData] = useState<ComicViewModel[]>([]);
 
-  // const isOffline = !(netInfo.isConnected && netInfo.isInternetReachable);
-
   const isOfflineRef = useRef(
     !(netInfo.isConnected && netInfo.isInternetReachable),
   );
@@ -46,6 +44,11 @@ export const ComicListScreen = observer(() => {
   }, [netInfo.isInternetReachable, netInfo.isConnected]);
 
   useEffect(() => {
+    // getRealm().then(realm => {
+    //   realm.write(() => {
+    //     realm.deleteAll();
+    //   });
+    // });
     setTimeout(() => {
       if (isOfflineRef.current) {
         loadFromDb();
@@ -60,7 +63,9 @@ export const ComicListScreen = observer(() => {
   const loadFromDb = async () => {
     const realm = await getRealm();
     const dbData: ComicViewModel[] = await realm.objects(ComicSchemaName);
-    console.warn('end', dbData.length);
+    if (dbData.length == 0) {
+      setError('No Data');
+    }
 
     setlListData(dbData);
     setIsLoading(false);
@@ -96,18 +101,22 @@ export const ComicListScreen = observer(() => {
           );
         });
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
     }
 
     console.warn('ComicSchemaName', realm.objects(ComicSchemaName).length);
   };
 
-  const fetchListData = async (_offset: number, _length: number, shouldAppend = false) => {
+  const fetchListData = async (
+    _offset: number,
+    _length: number,
+    shouldAppend = false,
+  ) => {
     if (isOfflineRef.current) {
       Toast.show({
         type: 'error',
-        text1: 'Network not reachanle',
+        text1: 'Network not reachable',
         text2: 'Please check your internet connection',
       });
       setIsLoading(false);
@@ -115,53 +124,65 @@ export const ComicListScreen = observer(() => {
       return;
     }
 
-    const resp = await getComics(_offset, _length);
+    try {
+      const resp = await getComics(_offset, _length);
 
-    if (resp.data) {
-      const data: Comic[] = resp.data.data.results;
-      console.warn('fetchListData', _offset, _length,data.length);
+      if (resp.data) {
+        const data: Comic[] = resp.data.data.results;
+        console.warn('fetchListData', _offset, _length, data.length);
 
-      const comicViewModels: ComicViewModel[] = data.map(c => {
-        let _onsaleDate =
-          c.dates?.find(d => d.type === 'onsaleDate')?.date ?? '';
-        let _focDate = c.dates?.find(d => d.type === 'focDate')?.date ?? '';
-        let _printPrice =
-          c.prices?.find(d => d.type === 'printPrice')?.price ?? undefined;
-        let _digitalPurchasePrice =
-          c.prices?.find(d => d.type === 'digitalPurchasePrice')?.price ??
-          undefined;
-        let _thumbnail = c.thumbnail?.path + '.' + c.thumbnail.extension;
+        const comicViewModels: ComicViewModel[] = data.map(c => {
+          let _onsaleDate =
+            c.dates?.find(d => d.type === 'onsaleDate')?.date ?? '';
+          let _focDate = c.dates?.find(d => d.type === 'focDate')?.date ?? '';
+          let _printPrice =
+            c.prices?.find(d => d.type === 'printPrice')?.price ?? undefined;
+          let _digitalPurchasePrice =
+            c.prices?.find(d => d.type === 'digitalPurchasePrice')?.price ??
+            undefined;
+          let _thumbnail = c.thumbnail?.path + '.' + c.thumbnail.extension;
 
-        const _creators = c.creators?.items?.map(_c => _c.name) ?? [];
-        const _characters = c.characters?.items?.map(_c => _c.name) ?? [];
-        const _stories = c.stories?.items?.map(_c => _c.name) ?? [];
+          const _creators = c.creators?.items?.map(_c => _c.name) ?? [];
+          const _characters = c.characters?.items?.map(_c => _c.name) ?? [];
+          const _stories = c.stories?.items?.map(_c => _c.name) ?? [];
 
-        return {
-          id: c.id,
-          title: c.title,
-          issueNumber: c.issueNumber,
-          description: c.description,
-          modified: c.modified,
-          pageCount: c.pageCount,
-          onsaleDate: _onsaleDate,
-          focDate: _focDate,
-          printPrice: _printPrice,
-          digitalPurchasePrice: _digitalPurchasePrice,
-          thumbnail: _thumbnail,
-          creators: _creators,
-          characters: _characters,
-          stories: _stories,
-        };
-      });
+          return {
+            id: c.id,
+            title: c.title,
+            issueNumber: c.issueNumber,
+            description: c.description,
+            modified: c.modified,
+            pageCount: c.pageCount,
+            onsaleDate: _onsaleDate,
+            focDate: _focDate,
+            printPrice: _printPrice,
+            digitalPurchasePrice: _digitalPurchasePrice,
+            thumbnail: _thumbnail,
+            creators: _creators,
+            characters: _characters,
+            stories: _stories,
+          };
+        });
 
-      writeTodb(comicViewModels);
+        writeTodb(comicViewModels);
 
-      if (shouldAppend) {
-        setlListData([...listData, ...comicViewModels]);
-      } else {
-        setlListData(comicViewModels);
+        if (shouldAppend) {
+          setlListData([...listData, ...comicViewModels]);
+        } else {
+          setlListData(comicViewModels);
+        }
       }
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Network error',
+        text2: 'Please check your internet connection',
+      });
+      loadFromDb();
+      setIsLoading(false);
+      setHasMore(false);
     }
+
     setIsLoading(false);
   };
 
@@ -186,7 +207,8 @@ export const ComicListScreen = observer(() => {
                 {'Oops... Something went wrong!\n' + error}
               </Text>
               <Button
-                style={styles.retryButton}
+                titleStyle={styles.retryText}
+                buttonStyle={styles.retryButton}
                 title={'Retry'}
                 onPress={() => fetchListData(0, listData.length)}
               />
@@ -222,7 +244,7 @@ export const ComicListScreen = observer(() => {
                   offset: ITEM_HEIGHT * index,
                   index,
                 })}
-                keyExtractor={(item, i) => i + ''}
+                keyExtractor={(item, i) => i + 'ke'}
                 onEndReached={onEndReached}
                 onEndReachedThreshold={0.5}
                 ListFooterComponent={() => {
@@ -243,6 +265,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
-  text: {fontSize: 25, textAlign: 'center', margin: 5},
+  text: {
+    fontSize: 20,
+    textAlign: 'center',
+    margin: 5,
+    fontFamily: FontFamily.bold,
+  },
+  retryText: {fontSize: 18, textAlign: 'center', fontFamily: FontFamily.bold},
   retryButton: {width: 100, alignSelf: 'center'},
 });
