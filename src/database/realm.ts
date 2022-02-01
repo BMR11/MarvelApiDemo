@@ -1,6 +1,6 @@
 import Realm from 'realm';
 
-export const ComicSchemaName = 'Comic66';
+export const ComicSchemaName = 'Comic';
 const ComicSchema = {
   name: ComicSchemaName,
   properties: {
@@ -22,13 +22,10 @@ const ComicSchema = {
   primaryKey: '_id',
 };
 
-// open a local realm with the 'Cat' schema
 export const getRealm = async () => {
   return await Realm.open({
-    path: 'myrlm111111',
+    path: 'myrlm',
     schema: [ComicSchema],
   });
 };
 
-// export const getAllCats = realm?.objects('Cat');
-// export const AddCat = (cat: CatObj) => {};

@@ -2,7 +2,7 @@
 import {useNetInfo} from '@react-native-community/netinfo';
 import {useNavigation} from '@react-navigation/native';
 import {observer} from 'mobx-react-lite';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   FlatList,
   RefreshControl,
@@ -33,23 +33,35 @@ export const ComicListScreen = observer(() => {
 
   const [listData, setlListData] = useState<ComicViewModel[]>([]);
 
-  const isOffline = 
-  netInfo.isConnected != null &&
-  netInfo.isInternetReachable != null &&
-  !(netInfo.isConnected && netInfo.isInternetReachable);
+  // const isOffline = !(netInfo.isConnected && netInfo.isInternetReachable);
+
+  const isOfflineRef = useRef(
+    !(netInfo.isConnected && netInfo.isInternetReachable),
+  );
 
   useEffect(() => {
-    if (isOffline) {
+    isOfflineRef.current = !(
+      netInfo.isConnected && netInfo.isInternetReachable
+    );
+  }, [netInfo.isInternetReachable, netInfo.isConnected]);
+
+  useEffect(() => {
+    setTimeout(() => {
+       if (isOfflineRef.current) {
       loadFromDb();
     } else {
       fetchListData('mnt');
     }
+    }, 500);
+   
     return () => {};
   }, []);
 
   const loadFromDb = async () => {
     const realm = await getRealm();
     const dbData: ComicViewModel[] = await realm.objects(ComicSchemaName);
+    console.warn('end', dbData.length);
+
     setlListData(dbData);
     setIsLoading(false);
   };
@@ -88,13 +100,12 @@ export const ComicListScreen = observer(() => {
       console.error(error);
     }
 
-    // console.warn('end', updatedComics);
     console.warn('ComicSchemaName', realm.objects(ComicSchemaName).length);
   };
 
   const fetchListData = async (caller = '') => {
     console.warn('fetchListData', caller);
-    if (isOffline) {
+    if (isOfflineRef.current) {
       Toast.show({
         type: 'error',
         text1: 'Network not reachanle',
@@ -181,7 +192,7 @@ export const ComicListScreen = observer(() => {
           ) : (
             <>
               <Text style={styles.text}>
-                {isOffline ? 'OFFLINE' : 'ONLINE'}
+                {isOfflineRef.current ? 'OFFLINE' : 'ONLINE'}
               </Text>
               <FlatList
                 refreshControl={

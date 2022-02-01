@@ -1,6 +1,7 @@
 import React from 'react';
 import LottieView from 'lottie-react-native';
 import {StyleSheet, Text, View} from 'react-native';
+import {FontFamily} from '../../constants/constants';
 
 export const LoadingView = ({label = 'Loading...'}: {label?: string}) => {
   return (
@@ -18,5 +19,11 @@ export const LoadingView = ({label = 'Loading...'}: {label?: string}) => {
 
 const styles = StyleSheet.create({
   lottieAnim: {width: 100, alignSelf: 'center'},
-  text: {fontSize: 25, textAlign: 'center', margin: 5},
+  text: {
+    fontSize: 25,
+    textAlign: 'center',
+    margin: 15,
+    color: 'black',
+    fontFamily: FontFamily.bold,
+  },
 });
