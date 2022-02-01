@@ -1,6 +1,6 @@
-# GithubApiDemo
+# How to run
 
-To run this, you need to 
+To run this, you need to Cancel changes
 - clone this repo
 - run command 'npm install'
 
