@@ -22,9 +22,11 @@ import {AppNavigator} from './src/screens/AppNavigator';
 import {RootStore} from './src/store/RootStore';
 import {LogBox} from 'react-native';
 
-//Hiding this warning for now as momentjs seems strict with formatting
+//Hate to add this but doing this considering timeline
 LogBox.ignoreLogs([
-  'Deprecation warning: value provided is not in a recognized RFC2822',
+  'Deprecation warning: value provided is not in a recognized RFC2822', //Hiding this warning for now as momentjs seems strict with formatting
+  'Failed prop type: Invalid prop `data`', //Return on realm is object which ts doesn't like 
+  'Non-serializable values were found in th',//Some bad data from api needs to be handled
 ]);
 
 //Currently not in use

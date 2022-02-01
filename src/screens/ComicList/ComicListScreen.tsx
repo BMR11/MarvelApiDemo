@@ -44,7 +44,7 @@ export const ComicListScreen = observer(() => {
 
   useEffect(() => {
     setTimeout(() => {
-      if (isOfflineRef.current) {
+      if (isOfflineRef.current) { // We want to show db data when offline
         loadFromDb();
       } else {
         fetchListData(0, RECORD_COUNT_PER_FETCH);
@@ -58,7 +58,7 @@ export const ComicListScreen = observer(() => {
   const loadFromDb = async () => {
     const realm = await getRealm();
     const dbData: ComicViewModel[] = await realm.objects(ComicSchemaName);
-    if (dbData.length == 0) {
+    if (dbData.length == 0) { // This is when we even not having db data.
       setError('No Data');
     }
 
