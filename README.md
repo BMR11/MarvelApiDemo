@@ -1,7 +1,7 @@
 # How to run
 
 To run this, you need to Cancel changes
-- clone this repo
+- clone this repo by running command 'git clone https://github.com/BMR11/MarvelApiDemo.git' and then go into MarvelApiDemo by 'cd MarvelApiDemo'
 - Update publicKey and privateKey in src/api/marvelApi file with your accoutn keys
 - run command 'npm install'
 
